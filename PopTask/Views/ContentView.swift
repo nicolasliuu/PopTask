@@ -8,14 +8,32 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var todoItems: [TodoItem] = []
+    @State private var showingAddTodo = false
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                List(todoItems) { item in
+                    TodoCircleView(todoItem: item)
+                }
+                
+                Button("Add Todo") {
+                    showingAddTodo = true
+                }
+                .sheet(isPresented: $showingAddTodo) {
+                    AddTodoView { newTodo in
+                        todoItems.append(newTodo)
+                        showingAddTodo = false
+                    }
+                }
+            }
+            .navigationTitle("Todo")
+            .onAppear {
+                NetworkManager.shared.fetchTodoItems { fetchedItems in
+                    todoItems = fetchedItems
+                }
+            }
         }
-        .padding()
     }
 }
 
